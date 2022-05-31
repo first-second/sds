@@ -1,17 +1,14 @@
+from os import name
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Main, Registration
 from .forms import RegistrationForm
 from django.http import HttpResponseRedirect
 
-# [model -> view]Create your views here.what needs to be shown in webpage
+# [model -> view]Create your views here.what needs to be shown in webpage.
 def home(request):
     sitename = 'SHARMA DRIVING SCHOOL'
-    data = Registration.objects.all()
-    customer={
-        "name":data
-    }
-
-    return render(request, 'front/home.html',{'sitename':sitename},{'customer':customer})
+    
+    return render(request, 'front/home.html',{'sitename':sitename},)
 
 def about(request):
 
