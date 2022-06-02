@@ -33,6 +33,8 @@ def home(request):
     X = list(df.iloc[:,1])
     Y = list(df.iloc[:,0])
     plt.bar(X,Y, color='black')
+    plt.xlabel("Areas covered")
+    plt.ylabel("No. of counts")
     plt.savefig('./foo.png',dpi=300,) 
     
     return render(request, 'front/home.html',)
