@@ -33,7 +33,7 @@ def home(request):
     X = list(df.iloc[:,1])
     Y = list(df.iloc[:,0])
     plt.bar(X,Y, color='black')
-    plt.savefig('/home/adarsh/Desktop/myweb/myproject/main/static/img/foo.png',dpi=300,) 
+    plt.savefig('./foo.png',dpi=300,) 
     
     return render(request, 'front/home.html',)
 
