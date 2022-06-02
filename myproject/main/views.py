@@ -35,7 +35,7 @@ def home(request):
     plt.bar(X,Y, color='black')
     plt.xlabel("Areas covered")
     plt.ylabel("No. of counts")
-    plt.savefig('./foo.png',dpi=300,) 
+    plt.savefig('/home/adarsh/git_workspace/sds/myproject/main/static/img/foo.png',dpi=300,) 
     
     return render(request, 'front/home.html',)
 
