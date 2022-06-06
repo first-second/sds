@@ -10,6 +10,10 @@ import pandas as pd
 from urllib.parse import quote
 from sqlalchemy import create_engine
 
+
+engine = create_engine(
+    'sqlite:///db.sqlite3',
+    )
  
 
 
@@ -19,15 +23,20 @@ from sqlalchemy import create_engine
 
 
 # [model -> view]Create your views here.what needs to be shown in webpage
+
+def count_rows():
+    query=pd.read_sql('select * from main_registration',con=engine)
+    df=pd.DataFrame(query)
+    total = df['id'].count()
+    return total
+
 def home(request):
     #sitename = 'SHARMA DRIVING SCHOOL'
     #registerdata = Registration.objects.raw('select id,address from main_registration')
     #data = {
     #    'registerdata':registerdata
     #}
-    engine = create_engine(
-    "mysql+pymysql://adarsh:%s@localhost:3306/sds_db" % quote('Dbpass@1'),
-    )
+    total=count_rows()
     chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
     df = pd.DataFrame(chart)
     X = list(df.iloc[:,1])
@@ -37,7 +46,7 @@ def home(request):
     plt.ylabel("No. of counts")
     plt.savefig('./main/static/img/foo.png',dpi=300,) 
     
-    return render(request, 'front/home.html',)
+    return render(request, 'front/home.html',{'total':total})
 
 def about(request):
 
