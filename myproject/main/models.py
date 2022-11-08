@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 # Create your models here.field setup shown in admin page
+
 class Main(models.Model):
     name = models.TextField()
     about = models.TextField()
@@ -13,7 +14,7 @@ class Main(models.Model):
 
 class Registration(models.Model):
     name = models.CharField(("Full Name"), max_length=50)
-    address = models.CharField(("Address"), max_length=50)
+    address = models.CharField(("Address"), max_length=20)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{10}$', message="Phone number must be entered in the format: '+999999999'. 10 digits allowed.")
     phone = models.CharField(validators=[phone_regex], max_length=10, blank=True,unique=True)
     #phone = models.IntegerField(("Phone"),unique=True)

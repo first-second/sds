@@ -14,13 +14,10 @@ from sqlalchemy import create_engine
 engine = create_engine(
     'sqlite:///db.sqlite3',
     )
- 
-
 
 #db_connection = sql.connect(host='localhost', database='sds_db', user='adarsh', password='Dbpass@1')
 
 #db_cursor = db_connection.cursor()
-
 
 # [model -> view]Create your views here.what needs to be shown in webpage
 
@@ -41,7 +38,7 @@ def home(request):
     df = pd.DataFrame(chart)
     X = list(df.iloc[:,1])
     Y = list(df.iloc[:,0])
-    plt.bar(X,Y, color='black')
+    plt.bar(X,Y, color=['orange', 'red', 'green', 'blue', 'cyan', 'yellow'])
     plt.xlabel("Areas covered")
     plt.ylabel("No. of counts")
     plt.savefig('./main/static/img/foo.png',dpi=300,) 
@@ -57,8 +54,7 @@ def contact(request):
     return render(request, 'front/contact.html')
 
 def register(request):
-
-
+    
     submitted = False
     if request.method == "POST":
         form = RegistrationForm(request.POST)
@@ -70,5 +66,8 @@ def register(request):
         if 'submitted' in request.GET:
                 submitted = True
     return render(request, 'front/register.html',{'form':form,'submitted':submitted})
+
+
+    
 
 
