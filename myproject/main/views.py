@@ -9,6 +9,9 @@ import pandas as pd
 #import mysql.connector as sql
 from urllib.parse import quote
 from sqlalchemy import create_engine
+from .serializers import RegistrationSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 engine = create_engine(
@@ -66,6 +69,14 @@ def register(request):
         if 'submitted' in request.GET:
                 submitted = True
     return render(request, 'front/register.html',{'form':form,'submitted':submitted})
+
+class RegistrationList(APIView):
+    def get(self, request):
+        Registration1=Registration.objects.all()
+        serializer=RegistrationSerializer(Registration1,many=True)
+        return Response(serializer.data)
+    def post(self):
+        pass
 
 
     

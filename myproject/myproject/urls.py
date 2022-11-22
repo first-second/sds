@@ -16,8 +16,11 @@ Including another URLconf
 from django.urls import include, re_path
 from django.contrib import admin
 from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
+from main import views
 #url set for the app
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'', include('main.urls')),
+    re_path(r'^Registration/', views.RegistrationList.as_view()),
 ]
