@@ -24,12 +24,12 @@ engine = create_engine(
 
 # [model -> view]Create your views here.what needs to be shown in webpage
 
-def count_rows():
+'''def count_rows():
     #query=pd.read_sql('select * from main_registration',con=engine)
     #df=pd.DataFrame(query)
     #total = df['id'].count()
     total=Registration.objects.all().count()
-    return total
+    return total'''
 
 def home(request):
     #sitename = 'SHARMA DRIVING SCHOOL'
@@ -37,7 +37,7 @@ def home(request):
     #data = {
     #    'registerdata':registerdata
     #}
-    total=count_rows()
+    total=Registration.objects.all().count()
     chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
     df = pd.DataFrame(chart)
     X = list(df.iloc[:,1])
