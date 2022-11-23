@@ -25,9 +25,10 @@ engine = create_engine(
 # [model -> view]Create your views here.what needs to be shown in webpage
 
 def count_rows():
-    query=pd.read_sql('select * from main_registration',con=engine)
-    df=pd.DataFrame(query)
-    total = df['id'].count()
+    #query=pd.read_sql('select * from main_registration',con=engine)
+    #df=pd.DataFrame(query)
+    #total = df['id'].count()
+    total=Registration.objects.all().count()
     return total
 
 def home(request):
