@@ -12,6 +12,9 @@ from sqlalchemy import create_engine
 from .serializers import RegistrationSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.shortcuts import render
+from django.db.models import Q
+
 
 
 engine = create_engine(
@@ -70,6 +73,29 @@ def register(request):
         if 'submitted' in request.GET:
                 submitted = True
     return render(request, 'front/register.html',{'form':form,'submitted':submitted})
+
+def certificate(request):
+    if request.method == 'GET':
+        query= request.GET.get('q')
+
+        submitbutton= request.GET.get('submit')
+
+        if query is not None:
+            #lookups= Q(name__icontains=query) | Q(address__icontains=query)
+            lookups= Q(phone__icontains=query)
+            results= Registration.objects.filter(lookups).distinct()
+
+            context={'results': results,
+                     'submitbutton': submitbutton}
+
+            return render(request, 'front/certificate.html', context)
+
+        else:
+            return render(request, 'front/certificate.html')
+
+    else:
+        return render(request, 'front/certificate.html')
+    #return render(request, 'front/certificate.html')
 
 class RegistrationList(APIView):
     def get(self, request):
