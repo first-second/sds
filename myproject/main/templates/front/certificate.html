@@ -40,11 +40,11 @@
 
 <center>
 <br></br> 
-<h1>Search with registered phone number</h1>
+<h1>Search here</h1>
 
 <br/>
 <form action="{% url 'certificate' %}" method="GET" value="{{request.GET.q}}">
-Search <input type="text" name="q" value="{{request.GET.q}}" placeholder="certificate"/>
+Search <input type="text" name="q" value="{{request.GET.q}}" placeholder={{ref}} onfocus="(this.type='date')" onblur="(this.type='text')"/>
     <input type="submit" name="submit" value="Search"/>
 </form>
 
@@ -55,13 +55,17 @@ Search <input type="text" name="q" value="{{request.GET.q}}" placeholder="certif
 <br/><br/>
 
 {% for result in results %}
-
-{{result.name}}
-<br/>
-
-{{result.address}}
-<br/>
-{{result.phone}}
+<div >
+<table style="border: 1px solid black;" >
+  <tr>
+    <td style="padding: 15px;">{{result.name}}</td>
+    <td style="padding: 15px;">{{result.address}}</td>
+    <td style="padding: 15px;">{{result.phone}}</td>
+    <td style="padding: 15px;">{{result.date}}</td>
+  </tr>
+</table>
+<br/> 
+</div>
 
 {% endfor %}
 {% else %}

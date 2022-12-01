@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import render
 from django.db.models import Q
+from datetime import date,timedelta
 
 
 
@@ -75,26 +76,30 @@ def register(request):
     return render(request, 'front/register.html',{'form':form,'submitted':submitted})
 
 def certificate(request):
+    ref=date.today()-timedelta(days=15)
     if request.method == 'GET':
         query= request.GET.get('q')
 
         submitbutton= request.GET.get('submit')
-
+        
         if query is not None:
             #lookups= Q(name__icontains=query) | Q(address__icontains=query)
-            lookups= Q(phone__icontains=query)
+            lookups= Q(date__icontains=query)
             results= Registration.objects.filter(lookups).distinct()
 
             context={'results': results,
                      'submitbutton': submitbutton}
-
+            #print("ref",ref)
             return render(request, 'front/certificate.html', context)
 
         else:
-            return render(request, 'front/certificate.html')
+            new_date={"ref":str(ref)}
+            print("ref",ref)
+            return render(request, 'front/certificate.html',new_date)
 
     else:
-        return render(request, 'front/certificate.html')
+        #print("ref",ref)
+        return render(request, 'front/certificate.html',{'ref':ref})
     #return render(request, 'front/certificate.html')
 
 class RegistrationList(APIView):
