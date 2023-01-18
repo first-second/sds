@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# sds
-sharmadrivingschool
-=======
 # sds - sharmadrivingschool
 
 ## First Page
