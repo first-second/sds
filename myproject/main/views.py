@@ -12,10 +12,12 @@ from sqlalchemy import create_engine
 from .serializers import RegistrationSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.shortcuts import render
 from django.db.models import Q
 from datetime import date,timedelta
-
+from rest_framework import status
+from rest_framework.decorators import api_view
+from django.http import HttpResponse
+from rest_framework.authtoken.views import ObtainAuthToken
 
 
 engine = create_engine(
@@ -102,13 +104,20 @@ def certificate(request):
         return render(request, 'front/certificate.html',{'ref':ref})
     #return render(request, 'front/certificate.html')
 
-class RegistrationList(APIView):
-    def get(self, request):
-        Registration1=Registration.objects.all()
-        serializer=RegistrationSerializer(Registration1,many=True)
+@api_view(['GET','POST'])
+def Registration_list(request):
+    if request.method == 'GET':
+        register=Registration.objects.all()
+        serializer=RegistrationSerializer(register,many=True)
         return Response(serializer.data)
-    def post(self):
-        pass
+    
+    if request.method == 'POST':
+        serializer=RegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+
+
 
 
     
