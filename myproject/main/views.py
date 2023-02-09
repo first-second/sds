@@ -43,17 +43,9 @@ def home(request):
     #data = {
     #    'registerdata':registerdata
     #}
-    total=Registration.objects.all().count()
-    chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
-    df = pd.DataFrame(chart)
-    X = list(df.iloc[:,1])
-    Y = list(df.iloc[:,0])
-    plt.bar(X,Y, color=['orange', 'red', 'green', 'blue', 'cyan', 'yellow'])
-    plt.xlabel("Areas covered")
-    plt.ylabel("No. of counts")
-    plt.savefig('./main/static/img/foo.png',dpi=300,) 
+     
     
-    return render(request, 'front/home.html',{'total':total})
+    return render(request, 'front/home.html')
 
 def about(request):
 
@@ -116,6 +108,18 @@ def Registration_list(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
+def dataView(request):
+    total=Registration.objects.all().count()
+    chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
+    df = pd.DataFrame(chart)
+    X = list(df.iloc[:,1])
+    Y = list(df.iloc[:,0])
+    plt.bar(X,Y, color=['orange', 'red', 'green', 'blue', 'cyan', 'yellow'])
+    plt.xlabel("Areas covered")
+    plt.ylabel("No. of counts")
+    plt.savefig('./main/static/img/foo.png',dpi=300,)
+
+    return render(request,'front/data.html',{'total':total})
 
 
 

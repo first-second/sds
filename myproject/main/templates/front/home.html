@@ -18,6 +18,8 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'vendor/chart.js/Chart.js' %}"></script>
+  <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
   <style>
   .fakeimg {
     height: 200px;
@@ -39,6 +41,7 @@
   <div class="container-fluid justify-content-end">
     
     <!--<ul class="navbar-nav">-->
+        <a class="navbar-nav nav-item nav-link active text-white" href="data">data</a>
         <a class="navbar-nav nav-item nav-link active text-white" href="certificate">certificate</a>
         <a class="navbar-nav nav-item nav-link active text-white" href="register">APPLY</a>
         <a class="navbar-nav nav-item nav-link active text-white" href="#ab">ABOUT</a>
@@ -48,7 +51,6 @@
 
 <!-- Carousel -->
 <div id="demo" class="carousel slide" data-bs-ride="carousel">
-
    <!-- Indicators/dots -->
    <div class="carousel-indicators">
      <button type="button" data-bs-target="#demo" data-bs-slide-to="0" class="active"></button>
@@ -80,24 +82,14 @@
    <button class="carousel-control-next" type="button" data-bs-target="#demo" data-bs-slide="next">
      <span class="carousel-control-next-icon"></span>
    </button>
- </div>
- <!--<py-script>
-  
- </py-script>-->
- <p>Total number of customers : {{total}}</p>
+</div>
+<!-- <p>Total number of customers : {{total}}</p>
 <div class="container d-flex justify-content-end">
   <img src="{%static 'img/foo.png'%}"width="100%" height="500"class="float-end"/>
 </div>
 <br></br>
+-->
 {% endblock %}
-<!--<div class="container p-4">
- {% for i in registerdata %}
-
- {{i.id}}     {{i.address}}
- <br></br>
-
- {% endfor %}
-</div>-->
 <!-- Footer -->
 <footer class="bg-dark text-center text-white" style="bottom:0">
   <!-- Grid container -->
@@ -170,6 +162,7 @@
   <p>MADE BY AN ENGINEER</p>
 </div>
 -->
-
+<script src="{% static 'vendor/chart.js/Chart.js' %}"></script>
+<script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
 </body>
 </html>
