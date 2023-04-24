@@ -1,7 +1,9 @@
 import matplotlib
 matplotlib.use('Agg')
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render
 from .models import Registration
+from .models import Orders
+from .models import OrderUpdate
 from .forms import RegistrationForm
 from django.http import HttpResponseRedirect
 import matplotlib.pyplot as plt
@@ -18,7 +20,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import HttpResponse
 from rest_framework.authtoken.views import ObtainAuthToken
+from . import checksum
+from django.views.decorators.csrf import csrf_exempt
 
+MERCHANT_KEY ='kbzk1D5bJiV_O3p5'
 
 engine = create_engine(
     'sqlite:///db.sqlite3',
@@ -121,9 +126,58 @@ def dataView(request):
 
     return render(request,'front/data.html',{'total':total})
 
+def checkout(request):
+    if request.method=="POST":
+        items_json = request.POST.get('itemsJson', '')
+        name = request.POST.get('name', '')
+        amount = request.POST.get('amount', '')
+        email = request.POST.get('email', '')
+        address = request.POST.get('address1', '') + " " + request.POST.get('address2', '')
+        city = request.POST.get('city', '')
+        state = request.POST.get('state', '')
+        zip_code = request.POST.get('zip_code', '')
+        phone = request.POST.get('phone', '')
+        order = Orders(items_json=items_json, name=name, email=email, address=address, city=city,
+                       state=state, zip_code=zip_code, phone=phone, amount=amount)
+        order.save()
+        update = OrderUpdate(order_id=order.order_id, update_desc="The order has been placed")
+        update.save()
+        thank = True
+        id = order.order_id
+        #return render(request, 'front/checkout.html', {'thank':thank, 'id': id})
+    #return render(request, 'front/checkout.html')
+        param_dict={
 
+                'MID': 'rlTBWW05668077930924',
+                'ORDER_ID': 'order.order_id',
+                'TXN_AMOUNT': '1',
+                'CUST_ID': email,
+                'INDUSTRY_TYPE_ID': 'Retail',
+                'WEBSITE': 'WEBSTAGING',
+                'CHANNEL_ID': 'WEB',
+                'CALLBACK_URL':'http://127.0.0.1:8000/main/handlerequest/',
 
+        }
+        param_dict['CHECKSUMHASH'] = checksum.generate_checksum(param_dict, MERCHANT_KEY)
+        return render(request, 'front/paytm.html', {'param_dict': param_dict})
+    return render(request, 'front/checkout.html')
 
-    
+@csrf_exempt
+def handlerequest(request):
+    # paytm will send you post request here
+    form = request.POST
+    response_dict = {}
+    for i in form.keys():
+        response_dict[i] = form[i]
+        if i == 'CHECKSUMHASH':
+            checksum = form[i]
+
+    verify = checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
+    if verify:
+        if response_dict['RESPCODE'] == '01':
+            print('order successful')
+        else:
+            print('order was not successful because' + response_dict['RESPMSG'])
+    return render(request, 'front/paymentstatus.html', {'response': response_dict})
 
 
