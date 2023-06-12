@@ -1,4 +1,5 @@
 import matplotlib
+import os
 matplotlib.use('Agg')
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Registration
@@ -18,7 +19,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import HttpResponse
 from rest_framework.authtoken.views import ObtainAuthToken
-
 
 engine = create_engine(
     'sqlite:///db.sqlite3',
@@ -52,19 +52,20 @@ def home(request):
     plt.xlabel("Areas covered")
     plt.ylabel("No. of counts")
     plt.savefig('./main/static/img/foo.png',dpi=300,) 
-    
-    return render(request, 'front/home.html',{'total':total})
+    ip=os.environ.get('EC2_INSTANCE_IP')
+    return render(request, 'front/home.html',{'total':total,'ip':ip})
 
 def about(request):
-
-    return render(request, 'front/about.html')
+    ip=os.environ.get('EC2_INSTANCE_IP')
+    return render(request, 'front/about.html',{'ip':ip})
 
 def contact(request):
 
     return render(request, 'front/contact.html')
 
 def register(request):
-    
+    ip=str(os.environ.get("EC2_INSTANCE_IP"))
+    print(ip)
     submitted = False
     if request.method == "POST":
         form = RegistrationForm(request.POST)
@@ -75,7 +76,7 @@ def register(request):
         form = RegistrationForm
         if 'submitted' in request.GET:
                 submitted = True
-    return render(request, 'front/register.html',{'form':form,'submitted':submitted})
+    return render(request, 'front/register.html',{'form':form,'submitted':submitted,'ip':ip})
 
 def certificate(request):
     ref=date.today()-timedelta(days=15)
