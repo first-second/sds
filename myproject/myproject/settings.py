@@ -27,8 +27,8 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.sdshp.in','127.0.0.1','172.17.0.1','192.168.1.102']
-
+#ALLOWED_HOSTS = ['www.sdshp.in','100.26.166.71']
+ALLOWED_HOSTS = [os.environ.get('EC2_INSTANCE_IP')]
 
 # Application definition
 
