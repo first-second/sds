@@ -24,11 +24,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from . import checksum
 from django.views.decorators.csrf import csrf_exempt
 
-<<<<<<< HEAD
-=======
 MERCHANT_KEY ='kbzk1D5bJiV_O3p5'
 
->>>>>>> 0c6845153355b7d33f3d1dd655ee6f5fcbb457e1
 engine = create_engine(
     'sqlite:///db.sqlite3',
     )
@@ -52,23 +49,9 @@ def home(request):
     #data = {
     #    'registerdata':registerdata
     #}
-<<<<<<< HEAD
-    total=Registration.objects.all().count()
-    chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
-    df = pd.DataFrame(chart)
-    X = list(df.iloc[:,1])
-    Y = list(df.iloc[:,0])
-    plt.bar(X,Y, color=['orange', 'red', 'green', 'blue', 'cyan', 'yellow'])
-    plt.xlabel("Areas covered")
-    plt.ylabel("No. of counts")
-    plt.savefig('./main/static/img/foo.png',dpi=300,) 
     ip=os.environ.get('EC2_INSTANCE_IP')
-    return render(request, 'front/home.html',{'total':total,'ip':ip})
-=======
      
-    
-    return render(request, 'front/home.html')
->>>>>>> 0c6845153355b7d33f3d1dd655ee6f5fcbb457e1
+    return render(request, 'front/home.html',{'ip':ip})
 
 def about(request):
     ip=os.environ.get('EC2_INSTANCE_IP')
