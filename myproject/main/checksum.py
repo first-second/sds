@@ -122,7 +122,6 @@ def __decode__(to_decode, iv, key):
 if __name__ == "__main__":
     params = {
         "MID": "mid",
-        "ORDER_ID": "order_id",
         "TXN_AMOUNT": "1",
         "CUST_ID": "cust_id",
         "CHANNEL_ID": "WEB",
@@ -132,6 +131,6 @@ if __name__ == "__main__":
 
     print(verify_checksum(
         params, 'xxxxxxxxxxxxxxxx',
-        "CD5ndX8VVjlzjWbbYoAtKQIlvtXPypQYOg0Fi2AUYKXZA5XSHiRF0FDj7vQu66S8MHx9NaDZ/uYm3WBOWHf+sDQAmTyxqUipA7i1nILlxrk="))
+        "HZ8tcSuWwTMG4rMyOBCQjH1kElPsOegiLyM+3eEGYvkfEvJaRWP/iBW3zClq7jCz7pFqqAZrDLieRTBoAb1KQlGHRQlfkbd8BI4PJm2JzbY="))
 
     # print(generate_checksum(params, "xxxxxxxxxxxxxxxx"))

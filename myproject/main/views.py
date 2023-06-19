@@ -23,7 +23,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from . import checksum
 from django.views.decorators.csrf import csrf_exempt
 
-MERCHANT_KEY ='kbzk1D5bJiV_O3p5'
+MERCHANT_KEY ='dP64425807474247'
 
 engine = create_engine(
     'sqlite:///db.sqlite3',
@@ -149,9 +149,8 @@ def checkout(request):
         param_dict={
 
                 'MID': 'rlTBWW05668077930924',
-                'ORDER_ID': 'order.order_id',
                 'TXN_AMOUNT': '1',
-                'CUST_ID': email,
+                'CUST_ID': 'firstsecondis72@gmail.com',
                 'INDUSTRY_TYPE_ID': 'Retail',
                 'WEBSITE': 'WEBSTAGING',
                 'CHANNEL_ID': 'WEB',
@@ -170,9 +169,9 @@ def handlerequest(request):
     for i in form.keys():
         response_dict[i] = form[i]
         if i == 'CHECKSUMHASH':
-            checksum = form[i]
-
-    verify = checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
+            Checksum = form[i]
+    print(response_dict,MERCHANT_KEY)
+    verify = checksum.verify_checksum(response_dict, MERCHANT_KEY, Checksum)
     if verify:
         if response_dict['RESPCODE'] == '01':
             print('order successful')
