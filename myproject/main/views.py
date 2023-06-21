@@ -23,15 +23,13 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from . import checksum
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.shortcuts import render,HttpResponse,redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegistrationForm
-from django.core.mail import send_mail
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import get_template
-from django.template import Context
+from django.contrib.auth import login, authenticate #add this
+from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm #add this
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -76,7 +74,8 @@ def register(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user=form.save()
+            login(request,user)
             return HttpResponseRedirect('/register?submitted=True')
     else:
         form = RegistrationForm
@@ -189,21 +188,30 @@ def handlerequest(request):
             print('order was not successful because' + response_dict['RESPMSG'])
     return render(request, 'front/paymentstatus.html', {'response': response_dict})
 
-def Login(request):
-    if request.method == 'POST':
-  
-        # AuthenticationForm_can_also_be_used__
-  
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username = username, password = password)
-        if user is not None:
-            form = login(request, user)
-            messages.success(request, f' welcome {username} !!')
-            return redirect('index')
+def LoginPage(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        print(form)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            print(username,password)
+            user = authenticate(username=username, password=password)
+            print("-------------------------------")
+            print(user)
+            if user is not None:
+                login(request, user)
+                messages.info(request, f"You are now logged in as {username}.")
+                return HttpResponseRedirect("http://127.0.0.1:8000/")
+            else:
+                messages.error(request,"Invalid username or password.")
         else:
-            messages.info(request, f'account done not exit plz sign in')
-    form = RegistrationForm
-    return render(request, 'user/login.html', {'form':form, 'title':'log in'})
+            messages.error(request,"Invalid username or password.")
+    form = AuthenticationForm()
+    return render(request=request, template_name="front/login.html", context={"login_form":form})
 
+def logout_request(request):
+	logout(request)
+	messages.info(request, "You have successfully logged out.") 
+	return redirect("main:homepage")
 

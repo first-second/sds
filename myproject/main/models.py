@@ -6,23 +6,24 @@ from django.core.validators import RegexValidator
 # Create your models here.field setup shown in admin page
 
 class Main(models.Model):
-    name = models.TextField()
+    username = models.TextField()
     about = models.TextField()
 
     def __str__(self):
-        return self.name
+        return self.username
 
 class Registration(models.Model):
-    name = models.CharField(("Full Name"), max_length=50)
+    username = models.CharField(("Full Name"), max_length=50)
     address = models.CharField(("Address"), max_length=20)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{10}$', message="Phone number must be entered in the format: '+999999999'. 10 digits allowed.")
     phone = models.CharField(validators=[phone_regex], max_length=10, blank=True,unique=True)
     #phone = models.IntegerField(("Phone"),unique=True)
     email_address = models.EmailField(("Email Address"), max_length=254)
     date = models.DateField(auto_now_add=True,auto_now=False,blank=True)
+    password=models.CharField(("password"), max_length=50)
 
     def __str__(self):
-        return self.name
+        return self.username
 
 class Orders(models.Model):
     order_id= models.AutoField(primary_key=True)
