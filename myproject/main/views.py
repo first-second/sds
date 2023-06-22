@@ -27,9 +27,9 @@ from django.shortcuts import render,HttpResponse,redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate #add this
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm #add this
+from .auth_backends import RegistrationBackend
+from django.contrib.auth.forms import AuthenticationForm
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -75,7 +75,7 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user=form.save()
-            login(request,user)
+            #login(request,user)
             return HttpResponseRedirect('/register?submitted=True')
     else:
         form = RegistrationForm
@@ -191,27 +191,23 @@ def handlerequest(request):
 def LoginPage(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
-        print(form)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            print(username,password)
-            user = authenticate(username=username, password=password)
-            print("-------------------------------")
-            print(user)
+            user = RegistrationBackend().authenticate(request, username=username, password=password)
             if user is not None:
-                login(request, user)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 messages.info(request, f"You are now logged in as {username}.")
-                return HttpResponseRedirect("http://127.0.0.1:8000/")
+                return render(request=request, template_name="front/userpage.html")
             else:
-                messages.error(request,"Invalid username or password.")
+                messages.error(request, "Invalid username or password.")
         else:
-            messages.error(request,"Invalid username or password.")
+            messages.error(request, "Invalid username or password.")
     form = AuthenticationForm()
-    return render(request=request, template_name="front/login.html", context={"login_form":form})
+    return render(request=request, template_name="front/login.html", context={"login_form": form})
 
 def logout_request(request):
 	logout(request)
 	messages.info(request, "You have successfully logged out.") 
-	return redirect("main:homepage")
+	return render(request=request, template_name="front/home.html",)
 

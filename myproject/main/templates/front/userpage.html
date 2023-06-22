@@ -1,0 +1,32 @@
+{% extends './home.html' %}
+
+{% block content %}
+<!--Navbar-->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <div class="container-fluid justify-content-end">
+    <ul class="navbar-nav mr-auto">
+      {% if user.is_authenticated %}
+      
+      <li class="nav-item">
+        <a class="nav-link" href="/logout">Logout</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Welcome, {{user.username}}</a>
+      </li>
+
+      {% else %}
+
+      <li class="nav-item">
+        <a class="nav-link" href="/login">Login</a>
+      </li>
+
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+<br></br>
+<center>
+<p class="text-center" style="font-size:40px">User Data</p>
+</center>
+<br></br>
+{% endblock %}
