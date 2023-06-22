@@ -108,6 +108,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+AUTH_USER_MODEL = 'main.Registration'
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 

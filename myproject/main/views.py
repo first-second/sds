@@ -188,23 +188,37 @@ def handlerequest(request):
             print('order was not successful because' + response_dict['RESPMSG'])
     return render(request, 'front/paymentstatus.html', {'response': response_dict})
 
+
 def LoginPage(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = RegistrationBackend().authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                messages.info(request, f"You are now logged in as {username}.")
-                return render(request=request, template_name="front/userpage.html")
-            else:
+            
+            try:
+                user = Registration.objects.get(username=username)
+                
+                if user.password == password:
+                    authenticated_user = authenticate(request, username=user.username, password=password)
+                    if authenticated_user is not None:
+                        login(request, authenticated_user)
+                        messages.info(request, f"You are now logged in as {username}.")
+                        return render(request=request, template_name="front/userpage.html")
+                
                 messages.error(request, "Invalid username or password.")
+            
+            except Registration.DoesNotExist:
+                messages.error(request, "Invalid username or password.")
+        
         else:
             messages.error(request, "Invalid username or password.")
-    form = AuthenticationForm()
+    
+    else:
+        form = AuthenticationForm()
+    
     return render(request=request, template_name="front/login.html", context={"login_form": form})
+
 
 def logout_request(request):
 	logout(request)
