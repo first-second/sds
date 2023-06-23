@@ -1,0 +1,42 @@
+{% extends './home.html' %}
+
+{% block content %}
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <div class="container-fluid justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+		<a class="nav-link active" href="http://{{ip}}:8080">HOME</a>
+        </li>
+        <!--<li class="nav-item">
+          <a class="nav-link active" href="contact">CONTACT</a>
+        </li>
+      -->
+      </ul>
+    </div>
+  </nav>
+<center>
+    <div class="container-fluid text-black col-sm-5 col-sm-offset-5">
+    <form method="post">
+        <p class="text-center" style="font-size:40px">Login Here</p>
+        {% csrf_token %} 
+        <label for="name">Username</label>
+        <input type="text" placeholder="Enter Username" id="username" name="username">
+        <br></br>
+        <label for="password">Password</label>
+        <input type="password" placeholder="Password" id="password" name="password">
+        <br></br>
+        <button type="submit">Log In</button>
+        <!-- <input type="button" value=""> -->
+        <!-- <div class="social">
+          <div class="go"><i class="fab fa-google"></i>  Google</div>
+          <div class="fb"><i class="fab fa-facebook"></i>  Facebook</div>
+        </div> -->
+        <br></br>
+        <a href="{% url 'register' %}" >Create a account</a>
+    </form>
+    </div>
+    <br></br>
+    <br></br>
+</center>
+
+{% endblock %}

@@ -2,27 +2,58 @@ from __future__ import unicode_literals
 from sqlite3 import Timestamp # read all languages
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.utils import timezone
+
+
 
 # Create your models here.field setup shown in admin page
 
 class Main(models.Model):
-    name = models.TextField()
+    username = models.TextField()
     about = models.TextField()
 
     def __str__(self):
-        return self.name
+        return self.username
 
-class Registration(models.Model):
-    name = models.CharField(("Full Name"), max_length=50)
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+class RegistrationManager(BaseUserManager):
+    def create_user(self, username, password=None, **extra_fields):
+        if not username:
+            raise ValueError("The Username field must be set.")
+        
+        user = self.model(username=username, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        
+        return self.create_user(username, password, **extra_fields)
+
+
+class Registration(AbstractBaseUser):
+    username = models.CharField(("Full Name"), max_length=50)
     address = models.CharField(("Address"), max_length=20)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{10}$', message="Phone number must be entered in the format: '+999999999'. 10 digits allowed.")
-    phone = models.CharField(validators=[phone_regex], max_length=10, blank=True,unique=True)
-    #phone = models.IntegerField(("Phone"),unique=True)
+    phone = models.CharField(validators=[phone_regex], max_length=10, blank=True, unique=True)
     email_address = models.EmailField(("Email Address"), max_length=254)
-    date = models.DateField(auto_now_add=True,auto_now=False,blank=True)
+    date = models.DateField(default=timezone.now)
+    password = models.CharField(("Password"), max_length=50)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
+
+    objects = RegistrationManager()
 
     def __str__(self):
-        return self.name
+        return self.username
 
 class Orders(models.Model):
     order_id= models.AutoField(primary_key=True)

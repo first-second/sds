@@ -7,12 +7,13 @@ from .models import Registration
 class RegistrationForm(ModelForm):
     class Meta:
         model = Registration
-        fields =('name','address','phone','email_address',)
+        fields =('username','address','phone','email_address','password')
         labels = {
-            'name':'',
+            'username':'',
             'address':'select the city',
             'phone':'',
             'email_address':'',
+            'password':'',
         }
         addresslist = (
             ('ghaziabad','ghaziabad'),
@@ -24,9 +25,10 @@ class RegistrationForm(ModelForm):
         )
 
         widgets = { 
-            'name': forms.TextInput(attrs={'class':'form-control','placeholder':'ENTER YOUR NAME','style': 'max-width: 500px'}),
+            'username': forms.TextInput(attrs={'class':'form-control','placeholder':'ENTER YOUR NAME','style': 'max-width: 500px'}),
             'address': forms.Select(choices=addresslist),
             'phone': forms.TextInput(attrs={'class':'form-control','placeholder':'ENTER YOUR PHONE NUMBER','style': 'max-width: 500px'}),
             'email_address': forms.EmailInput(attrs={'class':'form-control','placeholder':'ENTER YOUR EMAIL ID','style': 'max-width: 500px'}),
+            'password': forms.PasswordInput(attrs={'class':'form-control','placeholder':'ENTER YOUR PASSWORD','style': 'max-width: 500px'}),
         }
     

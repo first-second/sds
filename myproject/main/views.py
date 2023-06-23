@@ -23,8 +23,16 @@ from django.http import HttpResponse
 from rest_framework.authtoken.views import ObtainAuthToken
 from . import checksum
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, redirect
+from django.shortcuts import render,HttpResponse,redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .auth_backends import RegistrationBackend
+from django.contrib.auth.forms import AuthenticationForm
 
-MERCHANT_KEY ='kbzk1D5bJiV_O3p5'
+MERCHANT_KEY ='dP64425807474247'
 
 engine = create_engine(
     'sqlite:///db.sqlite3',
@@ -68,7 +76,8 @@ def register(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user=form.save()
+            #login(request,user)
             return HttpResponseRedirect('/register?submitted=True')
     else:
         form = RegistrationForm
@@ -77,6 +86,7 @@ def register(request):
     return render(request, 'front/register.html',{'form':form,'submitted':submitted,'ip':ip})
 
 def certificate(request):
+    ip=os.environ.get('EC2_INSTANCE_IP')
     ref=date.today()-timedelta(days=15)
     if request.method == 'GET':
         query= request.GET.get('q')
@@ -94,14 +104,14 @@ def certificate(request):
             return render(request, 'front/certificate.html', context)
 
         else:
-            new_date={"ref":str(ref)}
+            new_date={"ref":str(ref),'ip':ip}
             print("ref",ref)
             return render(request, 'front/certificate.html',new_date)
 
     else:
         #print("ref",ref)
-        return render(request, 'front/certificate.html',{'ref':ref})
-    #return render(request, 'front/certificate.html')
+        return render(request, 'front/certificate.html',{'ref':ref,'ip':ip})
+    #return render(request, 'front/certificate.html',{'ip':ip})
 
 @api_view(['GET','POST'])
 def Registration_list(request):
@@ -116,6 +126,7 @@ def Registration_list(request):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
 def dataView(request):
+    ip=os.environ.get('EC2_INSTANCE_IP')
     total=Registration.objects.all().count()
     chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
     df = pd.DataFrame(chart)
@@ -126,9 +137,10 @@ def dataView(request):
     plt.ylabel("No. of counts")
     plt.savefig('./main/static/img/foo.png',dpi=300,)
 
-    return render(request,'front/data.html',{'total':total})
+    return render(request,'front/data.html',{'total':total,'ip':ip})
 
 def checkout(request):
+    ip=os.environ.get('EC2_INSTANCE_IP')
     if request.method=="POST":
         items_json = request.POST.get('itemsJson', '')
         name = request.POST.get('name', '')
@@ -151,9 +163,8 @@ def checkout(request):
         param_dict={
 
                 'MID': 'rlTBWW05668077930924',
-                'ORDER_ID': 'order.order_id',
                 'TXN_AMOUNT': '1',
-                'CUST_ID': email,
+                'CUST_ID': 'firstsecondis72@gmail.com',
                 'INDUSTRY_TYPE_ID': 'Retail',
                 'WEBSITE': 'WEBSTAGING',
                 'CHANNEL_ID': 'WEB',
@@ -161,8 +172,8 @@ def checkout(request):
 
         }
         param_dict['CHECKSUMHASH'] = checksum.generate_checksum(param_dict, MERCHANT_KEY)
-        return render(request, 'front/paytm.html', {'param_dict': param_dict})
-    return render(request, 'front/checkout.html')
+        return render(request, 'front/paytm.html', {'param_dict': param_dict,'ip':ip})
+    return render(request, 'front/checkout.html',{'ip':ip})
 
 @csrf_exempt
 def handlerequest(request):
@@ -172,9 +183,9 @@ def handlerequest(request):
     for i in form.keys():
         response_dict[i] = form[i]
         if i == 'CHECKSUMHASH':
-            checksum = form[i]
-
-    verify = checksum.verify_checksum(response_dict, MERCHANT_KEY, checksum)
+            Checksum = form[i]
+    print(response_dict,MERCHANT_KEY)
+    verify = checksum.verify_checksum(response_dict, MERCHANT_KEY, Checksum)
     if verify:
         if response_dict['RESPCODE'] == '01':
             print('order successful')
@@ -182,4 +193,27 @@ def handlerequest(request):
             print('order was not successful because' + response_dict['RESPMSG'])
     return render(request, 'front/paymentstatus.html', {'response': response_dict})
 
+def LoginPage(request):
+    ip=os.environ.get('EC2_INSTANCE_IP')
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = RegistrationBackend().authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                messages.info(request, f"You are now logged in as {username}.")
+                return render(request=request, template_name="front/userpage.html")
+            else:
+                messages.error(request, "Invalid username or password.")
+        else:
+            messages.error(request, "Invalid username or password.")
+    form = AuthenticationForm()
+    return render(request=request, template_name="front/login.html", context={"login_form": form,'ip':ip})
+
+def logout_request(request):
+	logout(request)
+	messages.info(request, "You have successfully logged out.") 
+	return render(request=request, template_name="front/home.html",)
 
