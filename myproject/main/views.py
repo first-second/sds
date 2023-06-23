@@ -30,6 +30,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .auth_backends import RegistrationBackend
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import get_user_model
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -192,17 +193,18 @@ def LoginPage(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
+            email_address = form.cleaned_data.get('email_address')  
             password = form.cleaned_data.get('password')
-            user = RegistrationBackend().authenticate(request, username=username, password=password)
+            User = get_user_model()
+            user = RegistrationBackend().authenticate(request, email_address=email_address, password=password)
             if user is not None:
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                messages.info(request, f"You are now logged in as {username}.")
+                messages.info(request, f"You are now logged in as {email_address}.")
                 return render(request=request, template_name="front/userpage.html")
             else:
-                messages.error(request, "Invalid username or password.")
+                messages.error(request, "Invalid email address or password.")
         else:
-            messages.error(request, "Invalid username or password.")
+            messages.error(request, "Invalid email address or password.")
     form = AuthenticationForm()
     return render(request=request, template_name="front/login.html", context={"login_form": form})
 
