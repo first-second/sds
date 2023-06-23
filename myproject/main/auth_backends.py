@@ -4,7 +4,8 @@ from .models import Registration
 class RegistrationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
-            user = Registration.objects.get(username=username)
+            print(f"Number of Records: {Registration.objects.filter(username=username).count()}")
+            user = Registration.objects.get(phone=username)
             if user.password == password:
                 return user
         except Registration.DoesNotExist:
