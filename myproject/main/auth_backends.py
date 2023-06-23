@@ -2,16 +2,17 @@ from django.contrib.auth.backends import ModelBackend
 from .models import Registration
 
 class RegistrationBackend(ModelBackend):
-    def authenticate(self, request, email_address=None, password=None, **kwargs):
-        try:
-            user = Registration.objects.get(email_address=email_address)
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        registrations = Registration.objects.filter(username=username)
+
+        for user in registrations:
             if user.password == password:
                 return user
-        except Registration.DoesNotExist:
-            return None
+        
+        return None
 
     def get_user(self, user_id):
         try:
-            return Registration.objects.get(pk=user_id)
+            return Registration.objects.filter(pk=user_id).first()
         except Registration.DoesNotExist:
             return None
