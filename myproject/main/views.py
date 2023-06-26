@@ -30,6 +30,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .auth_backends import RegistrationBackend
 from django.contrib.auth.forms import AuthenticationForm
+import plotly.graph_objects as go
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -122,18 +123,38 @@ def Registration_list(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
-def dataView(request):
-    total=Registration.objects.all().count()
-    chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
-    df = pd.DataFrame(chart)
-    X = list(df.iloc[:,1])
-    Y = list(df.iloc[:,0])
-    plt.bar(X,Y, color=['orange', 'red', 'green', 'blue', 'cyan', 'yellow'])
-    plt.xlabel("Areas covered")
-    plt.ylabel("No. of counts")
-    plt.savefig('./main/static/img/foo.png',dpi=300,)
 
-    return render(request,'front/data.html',{'total':total})
+
+def dataView(request):
+    total = Registration.objects.all().count()
+    chart = pd.read_sql('select count(address) as count,address from main_registration group by address', con=engine)
+    df = pd.DataFrame(chart)
+    X = list(df.iloc[:, 1])
+    Y = list(df.iloc[:, 0])
+
+    # Define a color palette
+    color_palette = ['#4C78A8', '#F58518', '#E45756', '#72B7B2', '#54A24B', '#EECA3B']
+
+    # Create a bar chart using Plotly with gridlines
+    fig = go.Figure(data=[go.Bar(x=X, y=Y, marker_color=color_palette)])
+    fig.update_layout(
+        title='Areas Covered',
+        xaxis=dict(title='Areas', showgrid=True, gridwidth=0.5, gridcolor='rgba(255, 255, 255, 0.1)'),
+        yaxis=dict(title='No. of Counts', showgrid=True, gridwidth=0.5, gridcolor='rgba(255, 255, 255, 0.1)'),
+        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent background
+        paper_bgcolor='rgba(0, 0, 0, 0)',  # Transparent background
+        font=dict(family='Arial', size=14, color='black'),
+        bargap=0.1,  # Adjust the gap between bars
+        bargroupgap=0.05  # Adjust the gap between bar groups
+    )
+
+    # Convert the figure to HTML code
+    chart_html = fig.to_html(full_html=False)
+
+    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html})
+
+
+
 
 def checkout(request):
     if request.method=="POST":
