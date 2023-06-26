@@ -31,12 +31,30 @@ from django.contrib import messages
 from .auth_backends import RegistrationBackend
 from django.contrib.auth.forms import AuthenticationForm
 import plotly.graph_objects as go
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.core.mail import EmailMessage
+from .tokens import account_activation_token
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.encoding import force_str
+from django.urls import reverse
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.mail import send_mail
+from django.http import HttpResponse
+
+
 
 MERCHANT_KEY ='dP64425807474247'
 
 engine = create_engine(
     'sqlite:///db.sqlite3',
     )
+
 
 #db_connection = sql.connect(host='localhost', database='sds_db', user='adarsh', password='Dbpass@1')
 
@@ -69,20 +87,51 @@ def contact(request):
 
     return render(request, 'front/contact.html')
 
+
 def register(request):
-    
-    submitted = False
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            user=form.save()
-            #login(request,user)
-            return HttpResponseRedirect('/register?submitted=True')
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            # Send activation email
+            current_site = get_current_site(request)
+            mail_subject = 'Activate your account'
+            message = render_to_string('front/account_activation_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uidb64': urlsafe_base64_encode(force_bytes(str(user.pk))),
+                'token': account_activation_token.make_token(user),
+            })
+            to_email = form.cleaned_data.get('email_address')
+            email = EmailMessage(mail_subject, message, to=[to_email])
+            print(message,email,to_email)
+            email.send()
+
+            return redirect('registration_success')
     else:
-        form = RegistrationForm
-        if 'submitted' in request.GET:
-                submitted = True
-    return render(request, 'front/register.html',{'form':form,'submitted':submitted})
+        form = RegistrationForm()
+    
+    return render(request, 'front/register.html', {'form': form})
+
+def activate_account(request, uidb64, token):
+    try:
+        uid = str(urlsafe_base64_decode(uidb64), 'utf-8')
+        user = get_user_model().objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return render(request, 'front/account_activation_success.html')
+    else:
+        return render(request, 'front/account_activation_failure.html')
+    
+def registration_success(request):
+    return render(request, 'front/registration_success.html')
 
 def certificate(request):
     ref=date.today()-timedelta(days=15)
@@ -153,9 +202,6 @@ def dataView(request):
 
     return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html})
 
-
-
-
 def checkout(request):
     if request.method=="POST":
         items_json = request.POST.get('itemsJson', '')
@@ -224,11 +270,17 @@ def LoginPage(request):
                 messages.error(request, "Invalid username or password.")
         else:
             messages.error(request, "Invalid username or password.")
+    else:
+        # Clear login message if present
+        if 'login_message' in request.session:
+            del request.session['login_message']
     form = AuthenticationForm()
     return render(request=request, template_name="front/login.html", context={"login_form": form})
 
+
 def logout_request(request):
-	logout(request)
-	messages.info(request, "You have successfully logged out.") 
-	return render(request=request, template_name="front/home.html",)
+    logout(request)
+    request.session['login_message'] = False  # Set login message to False
+    messages.success(request, "You have successfully logged out.")
+    return render(request=request, template_name="front/home.html")
 
