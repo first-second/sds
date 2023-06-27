@@ -36,7 +36,6 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
-from .tokens import account_activation_token
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
@@ -46,8 +45,14 @@ from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
 from django.http import HttpResponse
-
-
+from .tokens import account_activation_token
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.crypto import get_random_string
+from django.core.signing import TimestampSigner
+from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+import random,string
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -89,46 +94,73 @@ def contact(request):
 
 
 def register(request):
+    form = RegistrationForm(request.POST or None)
     if request.method == "POST":
-        form = RegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
+            email = form.cleaned_data.get('email_address')
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            address = form.cleaned_data.get('address')
+            phone = form.cleaned_data.get('phone')
 
-            # Send activation email
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your account'
-            message = render_to_string('front/account_activation_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uidb64': urlsafe_base64_encode(force_bytes(str(user.pk))),
-                'token': account_activation_token.make_token(user),
-            })
-            to_email = form.cleaned_data.get('email_address')
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            print(message,email,to_email)
+            otp = get_random_string(length=6, allowed_chars='0123456789')
+            request.session['registration_otp'] = otp
+            request.session['registration_email'] = email
+            request.session['registration_username'] = username
+            request.session['registration_password'] = password
+            request.session['registration_address'] = address
+            request.session['registration_phone'] = phone
+
+            # Send OTP via email
+            mail_subject = 'Registration OTP'
+            message = f"Your OTP for registration is: {otp}"
+            email = EmailMessage(mail_subject, message, to=[email])
             email.send()
 
-            return redirect('registration_success')
-    else:
-        form = RegistrationForm()
-    
+            # Redirect to OTP verification page
+            return redirect('verify_otp')
+
     return render(request, 'front/register.html', {'form': form})
 
-def activate_account(request, uidb64, token):
-    try:
-        uid = str(urlsafe_base64_decode(uidb64), 'utf-8')
-        user = get_user_model().objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, get_user_model().DoesNotExist):
-        user = None
 
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return render(request, 'front/account_activation_success.html')
-    else:
-        return render(request, 'front/account_activation_failure.html')
+
+def verify_otp(request):
+    if request.method == "POST":
+        entered_otp = request.POST.get('otp')
+        expected_otp = request.session.get('registration_otp')
+        email = request.session.get('registration_email')
+        username = request.session.get('registration_username')
+        password = request.session.get('registration_password')
+        address = request.session.get('registration_address')
+        phone = request.session.get('registration_phone')
+
+        if entered_otp == expected_otp:
+            # Perform necessary actions after successful OTP verification
+            # For example, create the user in the database
+            user = Registration.objects.create_user(username=username, email_address=email, password=password, address=address, phone=phone)
+
+            # Send success registration email
+            mail_subject = 'Registration Successful'
+            message = render_to_string('front/account_activation_email.html', {
+                'user': user,
+            })
+            email = EmailMessage(mail_subject, message, to=[email])
+            email.send()
+
+            # Clear the temporary data from the session
+            del request.session['registration_otp']
+            del request.session['registration_email']
+            del request.session['registration_username']
+            del request.session['registration_password']
+            del request.session['registration_address']
+            del request.session['registration_phone']
+
+            return redirect('registration_success')
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+
+    return render(request, 'front/verify_otp.html')
+
     
 def registration_success(request):
     return render(request, 'front/registration_success.html')
