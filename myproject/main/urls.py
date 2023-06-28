@@ -1,5 +1,7 @@
 from django.urls import include, re_path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 #url setup for each page
 urlpatterns = [
     re_path(r'^$', views.home, name='home'),
@@ -19,3 +21,6 @@ urlpatterns = [
     re_path('verify-otp/', views.verify_otp, name='verify_otp'),
     #re_path('activate/<str:uidb64>/<str:token>/', views.activate_account, name='activate_account'),
     ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

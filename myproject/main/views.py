@@ -52,6 +52,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 import random,string
+from PIL import Image
+from django.core.files.storage import default_storage
+import os,shutil
+from django.conf import settings
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -93,7 +97,7 @@ def contact(request):
 
 
 def register(request):
-    form = RegistrationForm(request.POST or None)
+    form = RegistrationForm(request.POST or None, request.FILES or None)
     if request.method == "POST":
         if form.is_valid():
             email = form.cleaned_data.get('email_address')
@@ -101,6 +105,13 @@ def register(request):
             password = form.cleaned_data.get('password')
             address = form.cleaned_data.get('address')
             phone = form.cleaned_data.get('phone')
+            photo = form.cleaned_data.get('photo')  # Get the uploaded photo from the form
+            if photo:
+                # Save the photo to the temporary location
+                photo_name = f'temp/{username}_photo.jpg'
+                photo_path = default_storage.save(photo_name, photo)
+
+                request.session['registration_photo_path'] = photo_path
 
             otp = get_random_string(length=6, allowed_chars='0123456789')
             request.session['registration_otp'] = otp
@@ -132,12 +143,25 @@ def verify_otp(request):
         password = request.session.get('registration_password')
         address = request.session.get('registration_address')
         phone = request.session.get('registration_phone')
+        photo = request.session.get('registration_photo')
 
         if entered_otp == expected_otp:
             # Perform necessary actions after successful OTP verification
             # For example, create the user in the database
             user = Registration.objects.create_user(username=username, email_address=email, password=password, address=address, phone=phone)
+            photo_path = request.session.get('registration_photo_path')
+            if photo_path:
+                temp_photo_path = os.path.join(settings.MEDIA_ROOT, photo_path)
+                new_photo_path = os.path.join(settings.MEDIA_ROOT, 'photos', f'{username}_photo.jpg')
 
+                # Ensure the 'photos' directory exists
+                os.makedirs(os.path.join(settings.MEDIA_ROOT, 'photos'), exist_ok=True)
+
+                shutil.move(temp_photo_path, new_photo_path)
+
+                # Update the user's photo field
+                user.photo = f'photos/{username}_photo.jpg'
+                user.save()
             # Send success registration email
             mail_subject = 'Registration Successful'
             message = render_to_string('front/account_activation_email.html', {
