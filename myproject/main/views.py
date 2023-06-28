@@ -45,7 +45,6 @@ from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
 from django.http import HttpResponse
-from .tokens import account_activation_token
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.crypto import get_random_string
 from django.core.signing import TimestampSigner
