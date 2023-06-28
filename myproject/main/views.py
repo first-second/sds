@@ -56,6 +56,10 @@ from PIL import Image
 from django.core.files.storage import default_storage
 import os,shutil
 from django.conf import settings
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+
+
 
 MERCHANT_KEY ='dP64425807474247'
 
@@ -95,7 +99,7 @@ def contact(request):
 
     return render(request, 'front/contact.html')
 
-
+@csrf_protect
 def register(request):
     form = RegistrationForm(request.POST or None, request.FILES or None)
     if request.method == "POST":
@@ -133,7 +137,7 @@ def register(request):
     return render(request, 'front/register.html', {'form': form})
 
 
-
+@csrf_protect
 def verify_otp(request):
     if request.method == "POST":
         entered_otp = request.POST.get('otp')
@@ -256,7 +260,7 @@ def dataView(request):
     chart_html = fig.to_html(full_html=False)
 
     return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html})
-
+@csrf_protect
 def checkout(request):
     if request.method=="POST":
         items_json = request.POST.get('itemsJson', '')
@@ -292,7 +296,6 @@ def checkout(request):
         return render(request, 'front/paytm.html', {'param_dict': param_dict})
     return render(request, 'front/checkout.html')
 
-@csrf_exempt
 def handlerequest(request):
     # paytm will send you post request here
     form = request.POST
@@ -310,6 +313,7 @@ def handlerequest(request):
             print('order was not successful because' + response_dict['RESPMSG'])
     return render(request, 'front/paymentstatus.html', {'response': response_dict})
 
+@csrf_protect
 def LoginPage(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -320,7 +324,8 @@ def LoginPage(request):
             if user is not None:
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 messages.info(request, f"You are now logged in as {username}.")
-                return render(request=request, template_name="front/userpage.html")
+                #return render(request=request, template_name="front/userpage.html")
+                return redirect('user_dashboard')
             else:
                 messages.error(request, "Invalid username or password.")
         else:
@@ -332,6 +337,9 @@ def LoginPage(request):
     form = AuthenticationForm()
     return render(request=request, template_name="front/login.html", context={"login_form": form})
 
+def UserDashboard(request):
+    # Render the user dashboard template
+    return render(request, 'front/userpage.html')
 
 def logout_request(request):
     logout(request)

@@ -20,6 +20,7 @@ urlpatterns = [
     #re_path('send-test-email/', views.send_test_email, name='send_test_email'),
     re_path('verify-otp/', views.verify_otp, name='verify_otp'),
     #re_path('activate/<str:uidb64>/<str:token>/', views.activate_account, name='activate_account'),
+    re_path('user_dashboard',views.UserDashboard, name ="user_dashboard")
     ]
 
 if settings.DEBUG:
