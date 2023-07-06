@@ -102,25 +102,9 @@ def contact(request):
 
 @csrf_protect
 def register(request):
-<<<<<<< HEAD
-    ip=str(os.environ.get("EC2_INSTANCE_IP"))
-    print(ip)
-    submitted = False
-=======
     form = RegistrationForm(request.POST or None, request.FILES or None)
->>>>>>> e2f8e5882b5645575194e1909d2caa0ecdcbe657
     if request.method == "POST":
         if form.is_valid():
-<<<<<<< HEAD
-            user=form.save()
-            #login(request,user)
-            return HttpResponseRedirect('/register?submitted=True')
-    else:
-        form = RegistrationForm
-        if 'submitted' in request.GET:
-                submitted = True
-    return render(request, 'front/register.html',{'form':form,'submitted':submitted,'ip':ip})
-=======
             email = form.cleaned_data.get('email_address')
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -208,7 +192,6 @@ def verify_otp(request):
     
 def registration_success(request):
     return render(request, 'front/registration_success.html')
->>>>>>> e2f8e5882b5645575194e1909d2caa0ecdcbe657
 
 def certificate(request):
     ip=os.environ.get('EC2_INSTANCE_IP')
@@ -253,14 +236,9 @@ def Registration_list(request):
 
 
 def dataView(request):
-<<<<<<< HEAD
     ip=os.environ.get('EC2_INSTANCE_IP')
     total=Registration.objects.all().count()
     chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
-=======
-    total = Registration.objects.all().count()
-    chart = pd.read_sql('select count(address) as count,address from main_registration group by address', con=engine)
->>>>>>> e2f8e5882b5645575194e1909d2caa0ecdcbe657
     df = pd.DataFrame(chart)
     X = list(df.iloc[:, 1])
     Y = list(df.iloc[:, 0])
@@ -268,9 +246,6 @@ def dataView(request):
     # Define a color palette
     color_palette = ['#4C78A8', '#F58518', '#E45756', '#72B7B2', '#54A24B', '#EECA3B']
 
-<<<<<<< HEAD
-    return render(request,'front/data.html',{'total':total,'ip':ip})
-=======
     # Create a bar chart using Plotly with gridlines
     fig = go.Figure(data=[go.Bar(x=X, y=Y, marker_color=color_palette)])
     fig.update_layout(
@@ -286,7 +261,6 @@ def dataView(request):
 
     # Convert the figure to HTML code
     chart_html = fig.to_html(full_html=False)
->>>>>>> e2f8e5882b5645575194e1909d2caa0ecdcbe657
 
     return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html})
 @csrf_protect
