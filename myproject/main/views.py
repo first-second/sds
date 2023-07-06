@@ -103,6 +103,8 @@ def contact(request):
 @csrf_protect
 def register(request):
     form = RegistrationForm(request.POST or None, request.FILES or None)
+    ip=os.environ.get('EC2_INSTANCE_IP')
+    print(ip)
     if request.method == "POST":
         if form.is_valid():
             email = form.cleaned_data.get('email_address')
@@ -135,7 +137,7 @@ def register(request):
             # Redirect to OTP verification page
             return redirect('verify_otp')
 
-    return render(request, 'front/register.html', {'form': form})
+    return render(request, 'front/register.html', {'form': form, 'ip':ip })
 
 
 @csrf_protect
@@ -262,7 +264,7 @@ def dataView(request):
     # Convert the figure to HTML code
     chart_html = fig.to_html(full_html=False)
 
-    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html})
+    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html, 'ip':ip})
 @csrf_protect
 def checkout(request):
     ip=os.environ.get('EC2_INSTANCE_IP')
