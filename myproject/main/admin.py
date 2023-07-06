@@ -3,8 +3,14 @@ from .models import Main
 from .models import Registration
 # Register your models here.
 
-#admin.site.register(Main)
 class RegistrationAdmin(admin.ModelAdmin):
+    list_display = ('username', 'address', 'phone', 'email_address', 'date', 'photo')
+    readonly_fields = ('display_photo',)
 
-    search_fields=['name','address','phone','date']
-admin.site.register(Registration,RegistrationAdmin)
+    def display_photo(self, obj):
+        return obj.photo.url if obj.photo else ''
+
+    display_photo.short_description = 'Photo'
+
+admin.site.register(Registration, RegistrationAdmin)
+

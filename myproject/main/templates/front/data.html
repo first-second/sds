@@ -17,9 +17,11 @@
 <br></br>
 {% load static %}
 <p>Total number of customers : {{total}}</p>
-<div class="container d-flex justify-content-end">
-  <img src="{%static 'img/foo.png'%}"width="100%" height="500"class="float-end"/>
-</div>
+<div id="chart"></div>
+    <script>
+        // Render the Plotly chart using the generated HTML code
+        document.getElementById('chart').innerHTML = '{{ chart_html|safe }}';
+    </script>
 <br></br>
 <br></br>
 {% endblock %}

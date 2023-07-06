@@ -16,9 +16,10 @@
   </nav>
 <center>
     <div class="container-fluid text-black col-sm-5 col-sm-offset-5">
-    <form method="post">
-        <p class="text-center" style="font-size:40px">Login Here</p>
+      <form method="post" action="{% url 'login' %}">
         {% csrf_token %} 
+        <p class="text-center" style="font-size:40px">Login Here</p>
+        
         <label for="name">Username</label>
         <input type="text" placeholder="Enter Username" id="username" name="username">
         <br></br>

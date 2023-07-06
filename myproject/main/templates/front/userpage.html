@@ -26,7 +26,15 @@
 </nav>
 <br></br>
 <center>
-<p class="text-center" style="font-size:40px">User Data</p>
+  <p class="text-center" style="font-size:40px">User Data</p>
+  <form action ="" method="post">
+    {% csrf_token %}
+    <p text-align: start>&nbsp;&nbsp; profile photo &nbsp;&nbsp;&nbsp;<img src="{{ user.photo.url }}" alt="User Photo"  width="100" height="100"></p>
+  </form>
 </center>
+<br></br>
+<br></br>
+<br></br>
+<br></br>
 <br></br>
 {% endblock %}
