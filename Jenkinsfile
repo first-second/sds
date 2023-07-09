@@ -31,6 +31,7 @@ pipeline {
           
           // Check the return status of the Django application
           def returnStatus = sh returnStatus: true, script: 'echo \$?'
+          print returnStatus
 
           // Stop the build if the Django application ran successfully
           if (returnStatus == 0) {
