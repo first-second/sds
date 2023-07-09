@@ -32,7 +32,7 @@ pipeline {
       steps {
         // Execute commands inside the Docker container
         sh 'docker exec -e EC2_INSTANCE_IP=127.0.0.1 b622 /bin/bash -c "source /opt/myvenv/bin/activate && python /opt/myproject/manage.py runserver 0.0.0.0:8000 && def returnStatus = sh returnStatus: true, script: 'echo $?' "'
-        if (returnStatus == 0) {
+        if (returnStatus == 0): {
             error('Django application ran successfully. Stopping the build.')
           }
       }
