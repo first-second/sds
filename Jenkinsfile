@@ -2,13 +2,6 @@ pipeline {
   agent any
 
   stages {
-'''    stage('Start Container') {
-      steps {
-        // Start the Docker container
-        sh 'docker start b622'
-      }
-    }'''
-    
     stage('Check SCM Configuration') {
       steps {
         script {
