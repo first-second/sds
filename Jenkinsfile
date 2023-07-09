@@ -2,12 +2,12 @@ pipeline {
   agent any
 
   stages {
-    stage('Start Container') {
+'''    stage('Start Container') {
       steps {
         // Start the Docker container
         sh 'docker start b622'
       }
-    }
+    }'''
     stage('Check SCM Configuration') {
       steps {
         script {
@@ -31,7 +31,10 @@ pipeline {
     stage('Execute Commands') {
       steps {
         // Execute commands inside the Docker container
-        sh 'docker exec -e EC2_INSTANCE_IP=127.0.0.1 b622 /bin/bash -c "source /opt/myvenv/bin/activate && python /opt/myproject/manage.py runserver 0.0.0.0:8000"'
+        sh 'docker exec -e EC2_INSTANCE_IP=127.0.0.1 b622 /bin/bash -c "source /opt/myvenv/bin/activate && python /opt/myproject/manage.py runserver 0.0.0.0:8000 && def returnStatus = sh returnStatus: true, script: 'echo $?' "'
+        if (returnStatus == 0) {
+            error('Django application ran successfully. Stopping the build.')
+          }
       }
     }
     
