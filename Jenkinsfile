@@ -8,6 +8,7 @@ pipeline {
         sh 'docker start b622'
       }
     }'''
+    
     stage('Check SCM Configuration') {
       steps {
         script {
@@ -31,13 +32,19 @@ pipeline {
     stage('Execute Commands') {
       steps {
         // Execute commands inside the Docker container
-        sh 'docker exec -e EC2_INSTANCE_IP=127.0.0.1 b622 /bin/bash -c "source /opt/myvenv/bin/activate && python /opt/myproject/manage.py runserver 0.0.0.0:8000 && def returnStatus = sh returnStatus: true, script: 'echo $?' "'
-        if (returnStatus == 0): {
+        script {
+          // Execute commands inside the Docker container
+          sh 'docker exec -e EC2_INSTANCE_IP=127.0.0.1 b622 /bin/bash -c "source /opt/myvenv/bin/activate && python /opt/myproject/manage.py runserver 0.0.0.0:8000"'
+          
+          // Check the return status of the Django application
+          def returnStatus = sh returnStatus: true, script: 'echo \$?'
+
+          // Stop the build if the Django application ran successfully
+          if (returnStatus == 0) {
             error('Django application ran successfully. Stopping the build.')
           }
+        }
       }
     }
-    
   }
 }
-
