@@ -35,6 +35,7 @@ pipeline {
           // Stop the build if the Django application ran successfully
           if (returnStatus == 0) {
             error('Django application ran successfully. Stopping the build.')
+            return
           }
         }
       }
