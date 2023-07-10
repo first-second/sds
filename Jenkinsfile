@@ -1,6 +1,6 @@
 pipeline {
   agent any
-  
+
     stage('Execute Commands') {
       steps {
         // Execute commands inside the Docker container
@@ -18,4 +18,3 @@ pipeline {
       }
     }
   }
-}
