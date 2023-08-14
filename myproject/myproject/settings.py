@@ -144,6 +144,3 @@ EMAIL_HOST_USER = 'sharmadrivingschool.hp@gmail.com'
 EMAIL_HOST_PASSWORD = config('PASS_KEY')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-
-RAZOR_KEY_ID = config('RAZOR_KEY_ID')
-RAZOR_KEY_SECRET = config('RAZOR_KEY_SECRET')
