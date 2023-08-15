@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'payment',
     'rest_framework',
     'django_otp',
     'django_otp.plugins.otp_email',
@@ -144,3 +145,6 @@ EMAIL_HOST_USER = 'sharmadrivingschool.hp@gmail.com'
 EMAIL_HOST_PASSWORD = config('PASS_KEY')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+
+RAZORPAY_KEY_ID = config("RAZOR_KEY_ID")
+RAZORPAY_KEY_SECRET = config("RAZOR_KEY_ID")
