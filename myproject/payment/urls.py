@@ -1,10 +1,10 @@
-from django.urls import re_path
-from . import views
+from django.contrib import admin
+from django.urls import path
+from payment import views
 
 app_name = 'payment'
 urlpatterns = [
-    re_path(r'^home/', views.home, name="home"),
-    re_path(r'^payment/', views.order_payment, name="payment"),
-    re_path(r'^callback/', views.callback, name="callback"),
-    # Other payment app URLs
+    path('homepage/', views.homepage, name='homepage'),
+    path('paymenthandler/', views.paymenthandler, name='paymenthandler'),
+    path('admin/', admin.site.urls),
 ]
