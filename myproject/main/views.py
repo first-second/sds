@@ -21,7 +21,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import HttpResponse
 from rest_framework.authtoken.views import ObtainAuthToken
-from . import checksum
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.shortcuts import render,HttpResponse,redirect
@@ -59,6 +58,7 @@ import os,shutil
 from django.conf import settings
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+
 
 
 
@@ -276,7 +276,7 @@ def LoginPage(request):
             password = form.cleaned_data.get('password')
             user = RegistrationBackend().authenticate(request, username=username, password=password)
             if user is not None:
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login(request, user, backend='main.auth_backends.RegistrationBackend')
                 messages.info(request, f"You are now logged in as {username}.")
                 #return render(request=request, template_name="front/userpage.html")
                 return redirect('user_dashboard')
@@ -292,8 +292,10 @@ def LoginPage(request):
     return render(request=request, template_name="front/login.html", context={"login_form": form,'ip':ip})
 
 def UserDashboard(request):
-    # Render the user dashboard template
-    return render(request, 'front/userpage.html')
+    context = {
+        'user': request.user  # Pass the user to the template context
+    }
+    return render(request, 'front/userpage.html',context=context)
 
 def logout_request(request):
     logout(request)

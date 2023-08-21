@@ -16,8 +16,6 @@ class Main(models.Model):
     def __str__(self):
         return self.username
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
 class RegistrationManager(BaseUserManager):
     def create_user(self, username, email_address, password=None, address=None, phone=None,photo=None, **extra_fields):
         if not username:
