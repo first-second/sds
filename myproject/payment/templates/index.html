@@ -1,0 +1,56 @@
+{% extends 'front/home.html' %}
+{% block content %}
+
+<body>
+  <div class="container-fluid text-black col-sm-5 col-sm-offset-5">
+    <h1 class="title">Registration payment</h1>
+    <small class="container-fluid text-black col-sm-5 col-sm-offset-5"
+      >payment of Rs 1.</small
+    >
+    <div class="btn_container col-sm-5 col-sm-offset-5">
+      <!-- Payment Button -->
+      <button class="btn" id="pay-btn" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;"
+      onmouseover="this.style.backgroundColor = '#0056b3'"
+      onmouseout="this.style.backgroundColor = '#007bff'">Pay</button>
+    </div>
+  </div>
+</body>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- Razorpay's Javascript code. -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  var options = {
+     
+    // Enter the Key ID generated from the Dashboard
+    key: "{{ razorpay_merchant_key }}",
+     
+    // Amount is in currency subunits.
+    // Default currency is INR. Hence,
+    // 50000 refers to 50000 paise
+    amount: "{{ razorpay_amount }}",
+    currency: "{{ currency }}",
+     
+    // Your/store name.
+    name: "Dj Razorpay",
+     
+    // Pass the `id` obtained in the response of Step 1
+    order_id: "{{ razorpay_order_id }}",
+    callback_url: "{{ callback_url }}",
+  };
+   
+  // initialise razorpay with the options.
+  var rzp1 = new Razorpay(options);
+   
+  // add event listener to the payment button.
+  document.getElementById("pay-btn").onclick = function (e) {
+    rzp1.open();
+    e.preventDefault();
+  };
+</script>
+{% endblock %}
+  

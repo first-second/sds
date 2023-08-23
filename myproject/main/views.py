@@ -21,7 +21,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import HttpResponse
 from rest_framework.authtoken.views import ObtainAuthToken
-from . import checksum
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.shortcuts import render,HttpResponse,redirect
@@ -59,11 +58,7 @@ import os,shutil
 from django.conf import settings
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
-import razorpay
-from django.http import HttpResponseBadRequest
 
-razorpay_client = razorpay.Client(
-    auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
 
 
@@ -270,74 +265,6 @@ def dataView(request):
     chart_html = fig.to_html(full_html=False)
 
     return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html, 'ip':ip})
-@csrf_protect
-def checkout(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
-    currency = 'INR'
-    amount = 20000  # Rs. 200
- 
-    # Create a Razorpay Order
-    razorpay_order = razorpay_client.order.create(dict(amount=amount,
-                                                       currency=currency,
-                                                       payment_capture='0'))
- 
-    # order id of newly created order.
-    razorpay_order_id = razorpay_order['id']
-    callback_url = 'paymenthandler/'
- 
-    # we need to pass these details to frontend.
-    context = {}
-    context['razorpay_order_id'] = razorpay_order_id
-    context['razorpay_merchant_key'] = settings.RAZOR_KEY_ID
-    context['razorpay_amount'] = amount
-    context['currency'] = currency
-    context['callback_url'] = callback_url
-    return render(request, 'front/checkout.html',{'ip':ip})
-
-@csrf_exempt
-def paymenthandler(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
-    # only accept POST request.
-    if request.method == "POST":
-        try:
-           
-            # get the required parameters from post request.
-            payment_id = request.POST.get('razorpay_payment_id', '')
-            razorpay_order_id = request.POST.get('razorpay_order_id', '')
-            signature = request.POST.get('razorpay_signature', '')
-            params_dict = {
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': payment_id,
-                'razorpay_signature': signature
-            }
- 
-            # verify the payment signature.
-            result = razorpay_client.utility.verify_payment_signature(
-                params_dict)
-            if result is not None:
-                amount = 20000  # Rs. 200
-                try:
- 
-                    # capture the payemt
-                    razorpay_client.payment.capture(payment_id, amount)
- 
-                    # render success page on successful caputre of payment
-                    return render(request, 'paymentsuccess.html',{'ip':ip})
-                except:
- 
-                    # if there is an error while capturing payment.
-                    return render(request, 'paymentfail.html',{'ip':ip})
-            else:
- 
-                # if signature verification fails.
-                return render(request, 'paymentfail.html',{'ip':ip})
-        except:
- 
-            # if we don't find the required parameters in POST data
-            return HttpResponseBadRequest()
-    else:
-       # if other than POST request is made.
-        return HttpResponseBadRequest()
 
 @csrf_protect
 def LoginPage(request):
@@ -349,7 +276,7 @@ def LoginPage(request):
             password = form.cleaned_data.get('password')
             user = RegistrationBackend().authenticate(request, username=username, password=password)
             if user is not None:
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login(request, user, backend='main.auth_backends.RegistrationBackend')
                 messages.info(request, f"You are now logged in as {username}.")
                 #return render(request=request, template_name="front/userpage.html")
                 return redirect('user_dashboard')
@@ -365,8 +292,10 @@ def LoginPage(request):
     return render(request=request, template_name="front/login.html", context={"login_form": form,'ip':ip})
 
 def UserDashboard(request):
-    # Render the user dashboard template
-    return render(request, 'front/userpage.html')
+    context = {
+        'user': request.user  # Pass the user to the template context
+    }
+    return render(request, 'front/userpage.html',context=context)
 
 def logout_request(request):
     logout(request)

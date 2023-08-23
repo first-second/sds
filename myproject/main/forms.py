@@ -5,7 +5,7 @@ from .models import Registration
 #form page setup visible in register webpage
 
 class RegistrationForm(forms.ModelForm):
-    photo = forms.ImageField(required=False)
+    photo = forms.ImageField(required=True)
     class Meta:
         model = Registration
         fields =('username','address','phone','email_address','password','photo')
