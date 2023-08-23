@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import razorpay
+import os
 from myproject import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseBadRequest
@@ -11,6 +12,7 @@ razorpay_client = razorpay.Client(
  
  
 def homepage(request):
+    ip=os.environ.get('EC2_INSTANCE_IP')
     currency = 'INR'
     amount = int(1)*100  # Rs. 200
  
@@ -31,7 +33,7 @@ def homepage(request):
     context['currency'] = currency
     context['callback_url'] = callback_url
  
-    return render(request, 'index.html', context=context)
+    return render(request, 'index.html', {'ip':ip , 'context':context})
  
  
 # we need to csrf_exempt this url as
