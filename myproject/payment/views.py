@@ -32,8 +32,9 @@ def homepage(request):
     context['razorpay_amount'] = amount
     context['currency'] = currency
     context['callback_url'] = callback_url
+    context['ip']=ip
  
-    return render(request, 'index.html', {'ip':ip , 'context':context})
+    return render(request, 'index.html', context=context)
  
  
 # we need to csrf_exempt this url as
