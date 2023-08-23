@@ -4,8 +4,6 @@ import os
 from myproject import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseBadRequest
- 
-print((settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 # authorize razorpay client with API Keys.
 razorpay_client = razorpay.Client(
     auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
