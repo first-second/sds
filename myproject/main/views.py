@@ -3,8 +3,6 @@ import os
 matplotlib.use('Agg')
 from django.shortcuts import render
 from .models import Registration
-from .models import Orders
-from .models import OrderUpdate
 from .forms import RegistrationForm
 from django.http import HttpResponseRedirect
 import matplotlib.pyplot as plt
@@ -58,7 +56,7 @@ import os,shutil
 from django.conf import settings
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
-
+from django.core.cache import cache
 
 
 
@@ -209,7 +207,8 @@ def certificate(request):
             results= Registration.objects.filter(lookups).distinct()
 
             context={'results': results,
-                     'submitbutton': submitbutton}
+                     'submitbutton': submitbutton,
+                     'ip': ip}
             #print("ref",ref)
             return render(request, 'front/certificate.html', context)
 
@@ -237,34 +236,42 @@ def Registration_list(request):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 
-def dataView(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
-    total=Registration.objects.all().count()
+
+def generate_chart():
     chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
     df = pd.DataFrame(chart)
     X = list(df.iloc[:, 1])
     Y = list(df.iloc[:, 0])
 
-    # Define a color palette
     color_palette = ['#4C78A8', '#F58518', '#E45756', '#72B7B2', '#54A24B', '#EECA3B']
 
-    # Create a bar chart using Plotly with gridlines
     fig = go.Figure(data=[go.Bar(x=X, y=Y, marker_color=color_palette)])
     fig.update_layout(
         title='Areas Covered',
         xaxis=dict(title='Areas', showgrid=True, gridwidth=0.5, gridcolor='rgba(255, 255, 255, 0.1)'),
         yaxis=dict(title='No. of Counts', showgrid=True, gridwidth=0.5, gridcolor='rgba(255, 255, 255, 0.1)'),
-        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent background
-        paper_bgcolor='rgba(0, 0, 0, 0)',  # Transparent background
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        paper_bgcolor='rgba(0, 0, 0, 0)',
         font=dict(family='Arial', size=14, color='black'),
-        bargap=0.1,  # Adjust the gap between bars
-        bargroupgap=0.05  # Adjust the gap between bar groups
+        bargap=0.1,
+        bargroupgap=0.05
     )
 
-    # Convert the figure to HTML code
     chart_html = fig.to_html(full_html=False)
+    return chart_html
 
-    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html, 'ip':ip})
+def dataView(request):
+    ip = os.environ.get('EC2_INSTANCE_IP')
+    total = Registration.objects.all().count()
+
+    # Check if chart data is in cache
+    chart_html = cache.get('chart_html')
+    if chart_html is None:
+        # If not in cache, generate chart and cache it
+        chart_html = generate_chart()
+        cache.set('chart_html', chart_html, timeout=3600)  # Cache for 1 hour
+
+    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html, 'ip': ip})
 
 @csrf_protect
 def LoginPage(request):
