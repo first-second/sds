@@ -3,6 +3,10 @@ from .models import Registration
 from django.contrib.auth.hashers import check_password
 
 class RegistrationBackend(ModelBackend):
+    """"
+    custom authentication backend for users
+    based on the Registration model and custom logic.
+    """
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
             user = Registration.objects.get(username=username)

@@ -100,9 +100,12 @@ def contact(request):
 
 @csrf_protect
 def register(request):
+    """
+    handles register page
+    """
     form = RegistrationForm(request.POST or None, request.FILES or None)
     ip=os.environ.get('EC2_INSTANCE_IP')
-    print(ip)
+    #print(ip)
     if request.method == "POST":
         if form.is_valid():
             email = form.cleaned_data.get('email_address')
@@ -115,7 +118,7 @@ def register(request):
                 # Save the photo to the temporary location
                 photo_name = f'temp/{username}_photo.jpg'
                 photo_path = default_storage.save(photo_name, photo)
-
+                #to use photo in a particular session
                 request.session['registration_photo_path'] = photo_path
 
             otp = get_random_string(length=6, allowed_chars='0123456789')
@@ -140,6 +143,9 @@ def register(request):
 
 @csrf_protect
 def verify_otp(request):
+    """
+    handles otp send and verify functionality
+    """
     if request.method == "POST":
         entered_otp = request.POST.get('otp')
         expected_otp = request.session.get('registration_otp')
@@ -194,15 +200,22 @@ def registration_success(request):
     return render(request, 'front/registration_success.html')
 
 def certificate(request):
+    """
+    Not completed !
+    search engine to look for the users registered
+    on particular date
+    """
     ip=os.environ.get('EC2_INSTANCE_IP')
     ref=date.today()-timedelta(days=15)
     if request.method == 'GET':
+        #'q' parameter is often used for search queries.
         query= request.GET.get('q')
 
         submitbutton= request.GET.get('submit')
         
         if query is not None:
             #lookups= Q(name__icontains=query) | Q(address__icontains=query)
+            #a lookup filter using the Q object.
             lookups= Q(date__icontains=query)
             results= Registration.objects.filter(lookups).distinct()
 

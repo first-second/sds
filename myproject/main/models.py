@@ -1,13 +1,8 @@
-from __future__ import unicode_literals
-from sqlite3 import Timestamp # read all languages
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 
-
-
-# Create your models here.field setup shown in admin page
 
 class Main(models.Model):
     username = models.TextField()
@@ -17,6 +12,9 @@ class Main(models.Model):
         return self.username
 
 class RegistrationManager(BaseUserManager):
+    """
+    custom methods for creating and managing users
+    """
     def create_user(self, username, email_address, password=None, address=None, phone=None,photo=None, **extra_fields):
         if not username:
             raise ValueError("The Username field must be set.")
@@ -35,10 +33,10 @@ class RegistrationManager(BaseUserManager):
 
         return self.create_user(username, email_address, password, **extra_fields)
 
-
-
-
 class Registration(AbstractBaseUser):
+    """"
+    Custom user model
+    """
     username = models.CharField(("Full Name"), max_length=50)
     address = models.CharField(("Address"), max_length=20)
     phone_regex = RegexValidator(
@@ -53,10 +51,10 @@ class Registration(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-
+    #username field will be used as unique identifier
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
-
+    #RegistrationManager will be used for managing user objects
     objects = RegistrationManager()
 
     def __str__(self):
