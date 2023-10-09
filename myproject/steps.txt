@@ -1,0 +1,1 @@
+$env:EC2_INSTANCE_IP="<IP address>"; python manage.py runserver 0.0.0.0:8000

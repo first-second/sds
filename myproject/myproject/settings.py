@@ -30,7 +30,6 @@ DEBUG = True
 #ALLOWED_HOSTS = ['www.sdshp.in','100.26.166.71']
 ALLOWED_HOSTS = [os.environ.get('EC2_INSTANCE_IP')]
 
-
 # Application definition
 
 INSTALLED_APPS = [

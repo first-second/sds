@@ -6,5 +6,5 @@ app_name = 'payment'
 urlpatterns = [
     path('homepage/', views.homepage, name='homepage'),
     path('paymenthandler/', views.paymenthandler, name='paymenthandler'),
-    path('admin/', admin.site.urls),
+    #path('admin/', admin.site.urls),
 ]
