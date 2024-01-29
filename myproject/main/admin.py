@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Main
 from .models import Registration
 # Register your models here.
+
 
 class RegistrationAdmin(admin.ModelAdmin):
     list_display = ('username', 'address', 'phone', 'email_address', 'date', 'photo')
@@ -13,4 +13,3 @@ class RegistrationAdmin(admin.ModelAdmin):
     display_photo.short_description = 'Photo'
 
 admin.site.register(Registration, RegistrationAdmin)
-

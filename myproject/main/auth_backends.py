@@ -2,6 +2,7 @@ from django.contrib.auth.backends import ModelBackend
 from .models import Registration
 from django.contrib.auth.hashers import check_password
 
+
 class RegistrationBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:

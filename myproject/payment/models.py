@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.db.models.fields import CharField
 from django.utils.translation import gettext_lazy as _
 from .constants import PaymentStatus
@@ -26,6 +23,10 @@ class Order(models.Model):
     signature_id = models.CharField(
         _("Signature ID"), max_length=128, null=False, blank=False
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.id = None
 
     def __str__(self):
         return f"{self.id}-{self.name}-{self.status}"

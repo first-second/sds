@@ -1,68 +1,32 @@
 import matplotlib
-import os
-matplotlib.use('Agg')
-from django.shortcuts import render
 from .models import Registration
-from .models import Orders
-from .models import OrderUpdate
 from .forms import RegistrationForm
-from django.http import HttpResponseRedirect
-import matplotlib.pyplot as plt
 import pandas as pd
-#import mysql.connector as sql
-from urllib.parse import quote
 from sqlalchemy import create_engine
 from .serializers import RegistrationSerializer
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q
-from datetime import date,timedelta
+from datetime import date, timedelta
 from rest_framework import status
 from rest_framework.decorators import api_view
-from django.http import HttpResponse
-from rest_framework.authtoken.views import ObtainAuthToken
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect
-from django.shortcuts import render,HttpResponse,redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,login,logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from .auth_backends import RegistrationBackend
 from django.contrib.auth.forms import AuthenticationForm
 import plotly.graph_objects as go
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes
 from django.core.mail import EmailMessage
-from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_decode
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.encoding import force_str
-from django.urls import reverse
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.core.mail import send_mail
-from django.http import HttpResponse
-from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import render, redirect
 from django.utils.crypto import get_random_string
-from django.core.signing import TimestampSigner
-from django.contrib.auth.tokens import default_token_generator
-from django.urls import reverse
-from django.utils.encoding import force_bytes, force_str
-import random,string
-from PIL import Image
 from django.core.files.storage import default_storage
-import os,shutil
+import os
+import shutil
 from django.conf import settings
 from django.views.decorators.csrf import csrf_protect
-from django.contrib.auth.decorators import login_required
 
 
-
-
-MERCHANT_KEY ='dP64425807474247'
+matplotlib.use('Agg')
+MERCHANT_KEY = 'dP64425807474247'
 
 engine = create_engine(
     'sqlite:///db.sqlite3',
@@ -82,28 +46,32 @@ engine = create_engine(
     total=Registration.objects.all().count()
     return total'''
 
+
 def home(request):
     #sitename = 'SHARMA DRIVING SCHOOL'
     #registerdata = Registration.objects.raw('select id,address from main_registration')
     #data = {
     #    'registerdata':registerdata
     #}
-    ip=os.environ.get('EC2_INSTANCE_IP')
+    ip = os.environ.get('EC2_INSTANCE_IP')
      
-    return render(request, 'front/home.html',{'ip':ip})
+    return render(request, 'front/home.html', {'ip': ip})
+
 
 def about(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
-    return render(request, 'front/about.html',{'ip':ip})
+    ip = os.environ.get('EC2_INSTANCE_IP')
+    return render(request, 'front/about.html', {'ip': ip})
+
 
 def contact(request):
 
     return render(request, 'front/contact.html')
 
+
 @csrf_protect
 def register(request):
     form = RegistrationForm(request.POST or None, request.FILES or None)
-    ip=os.environ.get('EC2_INSTANCE_IP')
+    ip = os.environ.get('EC2_INSTANCE_IP')
     print(ip)
     if request.method == "POST":
         if form.is_valid():
@@ -137,7 +105,7 @@ def register(request):
             # Redirect to OTP verification page
             return redirect('verify_otp')
 
-    return render(request, 'front/register.html', {'form': form, 'ip':ip })
+    return render(request, 'front/register.html', {'form': form, 'ip': ip})
 
 
 @csrf_protect
@@ -150,12 +118,13 @@ def verify_otp(request):
         password = request.session.get('registration_password')
         address = request.session.get('registration_address')
         phone = request.session.get('registration_phone')
-        photo = request.session.get('registration_photo')
+        #photo = request.session.get('registration_photo')
 
         if entered_otp == expected_otp:
             # Perform necessary actions after successful OTP verification
             # For example, create the user in the database
-            user = Registration.objects.create_user(username=username, email_address=email, password=password, address=address, phone=phone)
+            user = Registration.objects.create_user(username=username, email_address=email, password=password,
+                                                    address=address, phone=phone)
             photo_path = request.session.get('registration_photo_path')
             if photo_path:
                 temp_photo_path = os.path.join(settings.MEDIA_ROOT, photo_path)
@@ -195,61 +164,62 @@ def verify_otp(request):
 def registration_success(request):
     return render(request, 'front/registration_success.html')
 
-def certificate(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
-    ref=date.today()-timedelta(days=15)
-    if request.method == 'GET':
-        query= request.GET.get('q')
 
-        submitbutton= request.GET.get('submit')
+def certificate(request):
+    ip = os.environ.get('EC2_INSTANCE_IP')
+    ref = date.today()-timedelta(days=15)
+    if request.method == 'GET':
+        query = request.GET.get('q')
+
+        submitbutton = request.GET.get('submit')
         
         if query is not None:
             #lookups= Q(name__icontains=query) | Q(address__icontains=query)
-            lookups= Q(date__icontains=query)
-            results= Registration.objects.filter(lookups).distinct()
+            lookups = Q(date__icontains=query)
+            results = Registration.objects.filter(lookups).distinct()
 
-            context={'results': results,
-                     'submitbutton': submitbutton}
+            context = {'results': results, 'submitbutton': submitbutton}
             #print("ref",ref)
             return render(request, 'front/certificate.html', context)
 
         else:
-            new_date={"ref":str(ref),'ip':ip}
-            print("ref",ref)
-            return render(request, 'front/certificate.html',new_date)
+            new_date = {"ref": str(ref), 'ip': ip}
+            print("ref", ref)
+            return render(request, 'front/certificate.html', new_date)
 
     else:
         #print("ref",ref)
-        return render(request, 'front/certificate.html',{'ref':ref,'ip':ip})
+        return render(request, 'front/certificate.html', {'ref': ref, 'ip': ip})
     #return render(request, 'front/certificate.html',{'ip':ip})
 
-@api_view(['GET','POST'])
-def Registration_list(request):
+
+@api_view(['GET', 'POST'])
+def registration_list(request):
     if request.method == 'GET':
-        register=Registration.objects.all()
-        serializer=RegistrationSerializer(register,many=True)
+        registered = Registration.objects.all()
+        serializer = RegistrationSerializer(registered, many=True)
         return Response(serializer.data)
     
     if request.method == 'POST':
-        serializer=RegistrationSerializer(data=request.data)
+        serializer = RegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-def dataView(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
-    total=Registration.objects.all().count()
-    chart = pd.read_sql('select count(address) as count,address from main_registration group by address',con=engine)
+def data_view(request):
+    ip = os.environ.get('EC2_INSTANCE_IP')
+    total = Registration.objects.all().count()
+    chart = pd.read_sql('select count(address) as count,address from main_registration group by address', con=engine)
     df = pd.DataFrame(chart)
-    X = list(df.iloc[:, 1])
-    Y = list(df.iloc[:, 0])
+    x = list(df.iloc[:, 1])
+    y = list(df.iloc[:, 0])
 
     # Define a color palette
     color_palette = ['#4C78A8', '#F58518', '#E45756', '#72B7B2', '#54A24B', '#EECA3B']
 
     # Create a bar chart using Plotly with gridlines
-    fig = go.Figure(data=[go.Bar(x=X, y=Y, marker_color=color_palette)])
+    fig = go.Figure(data=(go.Bar(x=x, y=y, marker_color=color_palette),))
     fig.update_layout(
         title='Areas Covered',
         xaxis=dict(title='Areas', showgrid=True, gridwidth=0.5, gridcolor='rgba(255, 255, 255, 0.1)'),
@@ -264,11 +234,12 @@ def dataView(request):
     # Convert the figure to HTML code
     chart_html = fig.to_html(full_html=False)
 
-    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html, 'ip':ip})
+    return render(request, 'front/data.html', {'total': total, 'chart_html': chart_html, 'ip': ip})
+
 
 @csrf_protect
-def LoginPage(request):
-    ip=os.environ.get('EC2_INSTANCE_IP')
+def login_page(request):
+    ip = os.environ.get('EC2_INSTANCE_IP')
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -289,17 +260,18 @@ def LoginPage(request):
         if 'login_message' in request.session:
             del request.session['login_message']
     form = AuthenticationForm()
-    return render(request=request, template_name="front/login.html", context={"login_form": form,'ip':ip})
+    return render(request=request, template_name="front/login.html", context={"login_form": form, 'ip': ip})
 
-def UserDashboard(request):
+
+def user_dashboard(request):
     context = {
         'user': request.user  # Pass the user to the template context
     }
-    return render(request, 'front/userpage.html',context=context)
+    return render(request, 'front/userpage.html', context=context)
+
 
 def logout_request(request):
     logout(request)
     request.session['login_message'] = False  # Set login message to False
     messages.success(request, "You have successfully logged out.")
     return render(request=request, template_name="front/home.html")
-
